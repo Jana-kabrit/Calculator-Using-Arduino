@@ -1,0 +1,2 @@
+# Calculator-Using-Arduino
+The aim of this experiment is to design and simulate a calculator using an Arduino Uno board. A keypad will be used as the only source for input and an LCD screen for the output. The input consists of numbers and standard mathematical operators, and the Arduino would perform the specified operation printing out the result. The experiment was successful, and the desired results were obtained.
