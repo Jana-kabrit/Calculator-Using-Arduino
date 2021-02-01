@@ -1,0 +1,192 @@
+#include <LiquidCrystal.h> 
+
+LiquidCrystal lcd(A5, 1, 2, 3, 4, 5);
+const int c1 = 9, c2 = 8, c3 = 7, c4 = 6;
+const int r1 = 13, r2 = 12, r3 = 11, r4 = 10;
+
+int add = 10, subtract = 11, multiply = 12, divide = 13;
+int equal = 14, clear = 15;
+
+unsigned long previousDebounceTime = 0;
+unsigned long debounceDelay = 100;
+
+long int num1 = 0, num2 = 0, operand, placeholder;
+double result;
+bool check = false, sign = false, done = false;
+
+void setup() {
+  lcd.begin(16,2);
+  lcd.setCursor(0, 0);
+  lcd.print("Arduino Uno");
+  lcd.setCursor(0,1);
+  lcd.print("Calculator!");
+  delay(1000);
+  lcd.clear();
+  
+  pinMode(c1, INPUT_PULLUP);
+  pinMode(c2, INPUT_PULLUP);
+  pinMode(c3, INPUT_PULLUP);
+  pinMode(c4, INPUT_PULLUP);
+
+  pinMode(r1, OUTPUT);
+  pinMode(r2, OUTPUT);
+  pinMode(r3, OUTPUT);
+  pinMode(r4, OUTPUT);
+}
+
+void loop() {
+  row1();
+  row2();
+  row3();
+  row4();
+  
+  if(check == true){
+    if(placeholder == clear){
+      lcd.clear();
+      num1 = 0;
+      num2 = 0;
+      operand = 0;
+      placeholder = -1;
+      sign = false;
+      done = false;
+    }
+  }
+  if(check == true && done == false){
+    if(placeholder <= 9 && placeholder != -1){
+      if(sign == false){
+        lcd.print(placeholder);
+        num1 = (num1 * 10) + placeholder;
+      }
+      if(sign == true){
+        lcd.print(placeholder);
+        num2 = (num2 * 10) + placeholder;
+      }
+    }
+    if(placeholder > 9){
+      if(sign == false){
+        operand = placeholder;
+        if(operand == add)
+          lcd.print("+");
+        else if(operand == subtract)
+          lcd.print("-");
+        else if(operand == multiply)
+          lcd.print("x");
+        else if(operand == divide)
+          lcd.print("/");
+        sign = true;
+      }
+      if(sign == true){
+        if(placeholder == equal){
+          if(operand == add)
+            result = num1 + num2;
+          else if(operand == subtract)
+            result = num1 - num2;
+          else if(operand == multiply)
+            result = num1 * num2;
+          else if(operand == divide)
+            result = (double)num1 / (double)num2;
+          done = true;
+          lcd.setCursor(0,1);
+          lcd.print("=");
+          lcd.print(result);
+        }
+      }
+    }
+    check = false;
+  }
+}
+
+void row1() {
+  digitalWrite(r1, LOW);
+  digitalWrite(r2, HIGH);
+  digitalWrite(r3, HIGH);
+  digitalWrite(r4, HIGH);
+  
+  if (debounce(c1) == LOW) {
+    placeholder = 1;
+  }
+  else if (debounce(c2) == LOW) {
+    placeholder = 2;
+  }
+  else if (debounce(c3) == LOW) {
+    placeholder = 3;
+  }
+  else if (debounce(c4) == LOW) {
+    placeholder = 10;
+  }
+}
+
+void row2() {
+  digitalWrite(r1, HIGH);
+  digitalWrite(r2, LOW);
+  digitalWrite(r3, HIGH);
+  digitalWrite(r4, HIGH);
+  
+  if (debounce(c1) == LOW) {
+    placeholder = 4;
+  }
+  else if (debounce(c2) == LOW) {
+    placeholder = 5;
+  }
+  else if (debounce(c3) == LOW) {
+    placeholder = 6;
+  }
+  else if (debounce(c4) == LOW) {
+    placeholder = 11;
+  }
+}
+
+void row3() {
+  digitalWrite(r1, HIGH);
+  digitalWrite(r2, HIGH);
+  digitalWrite(r3, LOW);
+  digitalWrite(r4, HIGH);
+
+  if (debounce(c1) == LOW) {
+    placeholder = 7;
+  }
+  else if (debounce(c2) == LOW) {
+    placeholder = 8;
+  }
+  else if (debounce(c3) == LOW) {
+    placeholder = 9;
+  }
+  else if (debounce(c4) == LOW) {
+    placeholder = 12;
+  }
+}
+
+void row4() {
+  digitalWrite(r1, HIGH);
+  digitalWrite(r2, HIGH);
+  digitalWrite(r3, HIGH);
+  digitalWrite(r4, LOW);
+
+  if (debounce(c1) == LOW) {
+    placeholder = 15;
+  }
+  else if (debounce(c2) == LOW) {
+    placeholder = 0;
+  }
+  if (debounce(c3) == LOW) {
+    placeholder = 14;
+  }
+  else if (debounce(c4) == LOW) {
+    placeholder = 13;
+  }
+}
+       
+
+int debounce(int buttonPin){
+  int reading = digitalRead(buttonPin);
+  
+  if (reading == LOW) {
+    if ((millis() - previousDebounceTime) > debounceDelay) {
+      previousDebounceTime = millis();
+      check = true;
+      return LOW;
+    }
+  }
+  return HIGH;
+} 
+
